@@ -39,8 +39,12 @@ char encode_char(char character, int rotation) {
 }
 
 char *encode(char input[], int rotation) {
-  int input_len = strlen(input) + 1;
-  char *output = malloc(input_len);
+  int input_len = strlen(input);
+  char *output = malloc(input_len + 1);
+  if (!output) {
+    fprintf(stderr, "Memory allocation error.\n");
+    exit(1);
+  }
 
   for (int i = 0; input[i] != '\0'; i++) {
     output[i] = encode_char(input[i], rotation);
@@ -62,10 +66,14 @@ char decode_char(char character, int rotation) {
 }
 
 char *decode(char input[], int rotation) {
-  int input_len = strlen(input) + 1;
-  char *output = malloc(input_len);
+  int input_len = strlen(input);
+  char *output = malloc(input_len + 1);
+  if (!output) {
+    fprintf(stderr, "Memory allocation error.\n");
+    exit(1);
+  }
 
-  for (int i = 0; input[i] != '\0'; i++) {
+  for (int i = 0; i < input_len; i++) {
     output[i] = decode_char(input[i], rotation);
   }
   output[input_len] = '\0';
