@@ -15,14 +15,11 @@ void usage() {
          "-e, --encode         Encodes provided string\n");
 }
 
-int compare(const void *a, const void *b) { return (*(char *)a - *(char *)b); }
-
 int find_index(char target, const char coll[], int coll_size) {
-  char *result =
-      (char *)bsearch(&target, coll, coll_size, sizeof(char), compare);
-
-  if (result != NULL)
-    return (int)(result - coll);
+  for (int i = 0; i < coll_size; i++) {
+    if (coll[i] == target)
+      return i;
+  }
 
   return -1;
 }
