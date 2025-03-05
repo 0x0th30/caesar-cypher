@@ -1,16 +1,12 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define ALPHABET_SIZE 26
 #define DEFAULT_ROTATION 1
-
 #define ENCODE 1
 #define DECODE -1
-
-const char ALPHABET[ALPHABET_SIZE] = {
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
 
 void usage() {
   printf("Usage: caesar [mode] [string] \n"
@@ -18,27 +14,16 @@ void usage() {
          "-e         Encodes provided string\n");
 }
 
-int find_index(char target) {
-  for (int i = 0; i < ALPHABET_SIZE; i++) {
-    if (ALPHABET[i] == target)
-      return i;
-  }
-
-  // how to return a value to indicate out-of-bound character?
-  return 0;
-}
-
 char cipher_char(char character, int rotation, int mode) {
-  int index = find_index(character);
-  if (index == 0)
-    return character;
+  if (isupper(character))
+    return 'A' + (character - 'A' + (rotation * mode) +
+                  ALPHABET_SIZE % ALPHABET_SIZE);
 
-  int ciphered_char_index = (index + (rotation * mode)) % ALPHABET_SIZE;
-  if (ciphered_char_index < 0) {
-    ciphered_char_index += ALPHABET_SIZE;
-  }
+  if (islower(character))
+    return 'a' + (character - 'a' + (rotation * mode) +
+                  ALPHABET_SIZE % ALPHABET_SIZE);
 
-  return ALPHABET[ciphered_char_index];
+  return character;
 }
 
 int get_mode(char arg[]) {
