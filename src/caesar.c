@@ -7,7 +7,7 @@
 #define ENCODE 1
 #define DECODE -1
 
-char cipher_char(char character, int rotation, int mode) {
+char cipher_char(const char character, const int rotation, const int mode) {
   if (isupper(character))
     return 'A' + (character - 'A' + (rotation * mode) + ALPHABET_SIZE) %
                      ALPHABET_SIZE;
@@ -19,7 +19,7 @@ char cipher_char(char character, int rotation, int mode) {
   return character;
 }
 
-int get_mode(char char_mode) {
+int get_mode(const char char_mode) {
   if (char_mode == 'E')
     return ENCODE;
   if (char_mode == 'D')
@@ -47,8 +47,12 @@ int main() {
   fgets(input, sizeof(input), stdin);
 
   size_t input_len = strlen(input);
+  if (input[input_len - 1] == '\n') {
+    input[input_len - 1] = '\0';
+    input_len--;
+  }
 
-  char *result = malloc(input_len + 1);
+  char *result = malloc(input_len);
   if (!result) {
     printf("Memory allocation error.");
     exit(EXIT_FAILURE);
@@ -57,9 +61,8 @@ int main() {
   for (int i = 0; i < input_len; i++) {
     result[i] = cipher_char(input[i], rotation, mode);
   }
-  result[input_len] = '\0';
 
-  printf("\n%s string: %s\n", mode == 1 ? "Encoded" : "Decoded", result);
+  printf("\n%s string: %s\n", mode == ENCODE ? "Encoded" : "Decoded", result);
 
   free(result);
 
