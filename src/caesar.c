@@ -5,107 +5,79 @@
 #define ALPHABET_SIZE 26
 #define DEFAULT_ROTATION 1
 
+#define ENCODE 1
+#define DECODE -1
+
 const char ALPHABET[ALPHABET_SIZE] = {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
 
 void usage() {
-  printf("Usage: caesar [direction] [string] \n"
-         "-d, --decode         Decodes provided string\n"
-         "-e, --encode         Encodes provided string\n");
+  printf("Usage: caesar [mode] [string] \n"
+         "-d         Decodes provided string\n"
+         "-e         Encodes provided string\n");
 }
 
-int find_index(char target, const char coll[], int coll_size) {
-  for (int i = 0; i < coll_size; i++) {
-    if (coll[i] == target)
+int find_index(char target) {
+  for (int i = 0; i < ALPHABET_SIZE; i++) {
+    if (ALPHABET[i] == target)
       return i;
   }
 
-  return -1;
+  // how to return a value to indicate out-of-bound character?
+  return 0;
 }
 
-char encode_char(char character, int rotation) {
-  int calculated_index =
-      find_index(character, ALPHABET, ALPHABET_SIZE) + rotation;
-  int alphabet_max_index = ALPHABET_SIZE - 1;
+char cipher_char(char character, int rotation, int mode) {
+  int index = find_index(character);
+  if (index == 0)
+    return character;
 
-  if (calculated_index > alphabet_max_index)
-    return ALPHABET[calculated_index - ALPHABET_SIZE];
+  int ciphered_char_index = (index + (rotation * mode)) % ALPHABET_SIZE;
+  if (ciphered_char_index < 0) {
+    ciphered_char_index += ALPHABET_SIZE;
+  }
 
-  return ALPHABET[calculated_index];
+  return ALPHABET[ciphered_char_index];
 }
 
-char *encode(char input[], int rotation) {
-  int input_len = strlen(input);
-  char *output = malloc(input_len + 1);
-  if (!output) {
-    fprintf(stderr, "Memory allocation error.\n");
-    exit(1);
+int get_mode(char arg[]) {
+  if (arg[0] == '-') {
+    if (arg[1] == 'e')
+      return ENCODE;
+    if (arg[1] == 'd')
+      return DECODE;
   }
 
-  for (int i = 0; input[i] != '\0'; i++) {
-    output[i] = encode_char(input[i], rotation);
-  }
-  output[input_len] = '\0';
-
-  return output;
-}
-
-char decode_char(char character, int rotation) {
-  int calculated_index =
-      find_index(character, ALPHABET, ALPHABET_SIZE) - rotation;
-  int alphabet_min_index = 0;
-
-  if (calculated_index < alphabet_min_index)
-    return ALPHABET[calculated_index + ALPHABET_SIZE];
-
-  return ALPHABET[calculated_index];
-}
-
-char *decode(char input[], int rotation) {
-  int input_len = strlen(input);
-  char *output = malloc(input_len + 1);
-  if (!output) {
-    fprintf(stderr, "Memory allocation error.\n");
-    exit(1);
-  }
-
-  for (int i = 0; i < input_len; i++) {
-    output[i] = decode_char(input[i], rotation);
-  }
-  output[input_len] = '\0';
-
-  return output;
+  usage();
+  exit(EXIT_FAILURE);
 }
 
 int main(int argc, char **argv) {
-  if (argc < 3) {
+  if (argc != 3) {
     usage();
-    return 1;
+    exit(EXIT_FAILURE);
   }
 
-  char *cypher_direction = argv[1];
-  char *entry_string = argv[2];
+  int mode = get_mode(argv[1]);
+  char *input = argv[2];
+  size_t input_len = strlen(input);
 
-  char *result;
-
-  if (strcmp(cypher_direction, "-e") == 0 ||
-      strcmp(cypher_direction, "--encode") == 0) {
-    result = encode(entry_string, DEFAULT_ROTATION);
-
-    printf("Encoded version of %s: %s\n", entry_string, result);
-
-    free(result);
+  char *result = malloc(input_len + 1);
+  if (!result) {
+    printf("Memory allocation error.");
+    exit(EXIT_FAILURE);
   }
 
-  if (strcmp(cypher_direction, "-d") == 0 ||
-      strcmp(cypher_direction, "--decode") == 0) {
-    result = decode(entry_string, DEFAULT_ROTATION);
-
-    printf("Decoded version of %s: %s\n", entry_string, result);
-
-    free(result);
+  for (int i = 0; i < input_len; i++) {
+    result[i] = cipher_char(input[i], DEFAULT_ROTATION, mode);
   }
+  result[input_len] = '\0';
+
+  printf("%s version of \"%s\": %s\n", mode == 1 ? "Encoded" : "Decoded", input,
+         result);
+
+  free(result);
 
   return 0;
 }
